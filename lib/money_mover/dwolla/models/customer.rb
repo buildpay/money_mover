@@ -23,7 +23,21 @@ module MoneyMover
         :type,
         :ipAddress,
         :status,
-        :created
+        :created,
+        :controllerFirstName,
+        :controllerLastName,
+        :controllerTitle,
+        :controllerDateOfBirth,
+        :controllerSsn,
+        :controllerAddress1,
+        :controllerAddress2,
+        :controllerAddress3,
+        :controllerCity,
+        :controllerState,
+        :controllerPostalCode,
+        :controllerCountry,
+        :controllerPassportNumber,
+        :controllerPassportCountry
 
       def self.find(id)
         client = ApplicationClient.new

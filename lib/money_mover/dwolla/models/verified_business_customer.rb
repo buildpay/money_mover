@@ -1,7 +1,12 @@
 module MoneyMover
   module Dwolla
     class VerifiedBusinessCustomer < Customer
-      validates_presence_of :address1,
+      CONTROLER_EXEMPT_BUSINESS_TYPES = ['soleproprietorship']
+
+      validates_presence_of :firstName,
+        :lastName,
+        :email,
+        :address1,
         :city,
         :state,
         :postalCode,
@@ -12,6 +17,17 @@ module MoneyMover
         :businessType,
         :businessName,
         :ein
+
+      validates_presence_of :controllerFirstName,
+        :controllerLastName,
+        :controllerTitle,
+        :controllerDateOfBirth,
+        :controllerAddress1,
+        :controllerCity,
+        :controllerState,
+        :controllerPostalCode,
+        :controllerCountry, if: :controller_required?
+      validate :controller_identifier_valid, if: :controller_required?
 
       #validates_inclusion_of :businessType, in: COMPANY_TYPES
 
@@ -43,7 +59,49 @@ module MoneyMover
         # hack to fix bug on dwolla's side with funding sources being removed if no dba is sent
         create_attrs[:doingBusinessAs] = businessName unless doingBusinessAs.present?
 
+        create_attrs[:controller] = controller_params if controller_required?
+
         create_attrs.reject{|_key, val| !val.present? }
+      end
+
+      def controller_required?
+        businessType.present? && !CONTROLER_EXEMPT_BUSINESS_TYPES.include?(businessType.downcase)
+      end
+
+      def controller_params
+        params = {
+          firstName: controllerFirstName,
+          lastName: controllerLastName,
+          title: controllerTitle,
+          dateOfBirth: controllerDateOfBirth,
+          address: controller_address_params
+        }
+        if controllerSsn.present?
+          params[:ssn] = controllerSsn
+        else
+          params[:passport] = { number: controllerPassportNumber, country: controllerPassportCountry }
+        end
+        params
+      end
+
+      def controller_address_params
+        params = {
+          address1: controllerAddress1,
+          address2: controllerAddress2,
+          address3: controllerAddress3,
+          city: controllerCity,
+          state: controllerState,
+          postalCode: controllerPostalCode,
+          country: controllerCountry
+        }
+        params.reject{|_key, val| !val.present? }
+      end
+
+      def controller_identifier_valid
+        unless controllerSsn.present? ||
+            (controllerPassportNumber.present? && controllerPassportCountry.present?)
+          errors.add :base, "Controller SSN or Passport information must be provided"
+        end
       end
     end
   end

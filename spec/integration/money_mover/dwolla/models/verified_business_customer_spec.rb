@@ -13,7 +13,7 @@ describe MoneyMover::Dwolla::VerifiedBusinessCustomer do
   let(:ssn) { '123456789' }
   let(:phone) { '636-333-3333' }
   let(:businessClassification) { 'some-business-classification' }
-  let(:businessType) { 'llc' }
+  let(:businessType) { 'soleproprietorship' } # Case where Controller info is not required
   let(:businessName) { 'Some Company, LLC' }
   let(:ein) { '987654321' }
   let(:doingBusinessAs) { 'Alternate Company Name' }
