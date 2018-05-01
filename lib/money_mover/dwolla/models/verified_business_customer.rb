@@ -53,13 +53,12 @@ module MoneyMover
           doingBusinessAs: doingBusinessAs,
           website: website_with_protocol,
           ipAddress: ipAddress,
-          type: 'business'
+          type: 'business',
+          controller: controller_params
         }
 
         # hack to fix bug on dwolla's side with funding sources being removed if no dba is sent
         create_attrs[:doingBusinessAs] = businessName unless doingBusinessAs.present?
-
-        create_attrs[:controller] = controller_params if controller_required?
 
         create_attrs.reject{|_key, val| !val.present? }
       end
@@ -69,23 +68,21 @@ module MoneyMover
       end
 
       def controller_params
-        params = {
-          firstName: controllerFirstName,
-          lastName: controllerLastName,
-          title: controllerTitle,
-          dateOfBirth: controllerDateOfBirth,
-          address: controller_address_params
-        }
-        if controllerSsn.present?
-          params[:ssn] = controllerSsn
-        else
-          params[:passport] = { number: controllerPassportNumber, country: controllerPassportCountry }
+        if controller_required?
+          {
+            firstName: controllerFirstName,
+            lastName: controllerLastName,
+            title: controllerTitle,
+            dateOfBirth: controllerDateOfBirth,
+            ssn: controllerSsn,
+            passport: controller_passport_params,
+            address: controller_address_params
+          }.reject{|_key, val| !val.present? }
         end
-        params
       end
 
       def controller_address_params
-        params = {
+        {
           address1: controllerAddress1,
           address2: controllerAddress2,
           address3: controllerAddress3,
@@ -93,8 +90,14 @@ module MoneyMover
           state: controllerState,
           postalCode: controllerPostalCode,
           country: controllerCountry
-        }
-        params.reject{|_key, val| !val.present? }
+        }.reject{|_key, val| !val.present? }
+      end
+
+      def controller_passport_params
+        {
+          number: controllerPassportNumber,
+          country: controllerPassportCountry
+        }.reject{|_key, val| !val.present? }
       end
 
       def controller_identifier_valid
