@@ -1,16 +1,5 @@
 module MoneyMover
   module Dwolla
-
-    class BaseModel
-      include ActiveModel::Validations
-      include ActiveModel::AttributeAssignment
-
-      def initialize(attributes = {})
-        assign_attributes(attributes) if attributes
-        super()
-      end
-    end
-
     class VerifiedBusinessCustomerControllerAddress < BaseModel
       attr_accessor :address1, :address2, :address3,
         :city, :stateProvinceRegion, :postalCode, :country
@@ -30,7 +19,7 @@ module MoneyMover
           stateProvinceRegion: stateProvinceRegion,
           postalCode: postalCode,
           country: country
-        }#.reject{|_key, val| !val.present? }
+        }
       end
     end
 
@@ -40,10 +29,7 @@ module MoneyMover
       validates_presence_of :number, :country
 
       def to_params
-        {
-          number: number,
-          country: country
-        }
+        { number: number, country: country }
       end
     end
 
@@ -72,7 +58,7 @@ module MoneyMover
           ssn: ssn,
           passport: passport ? passport.to_params : nil,
           address: address ? address.to_params : nil
-        }.reject{|_key, val| !val.present? }
+        }.compact
       end
 
       private
@@ -92,11 +78,31 @@ module MoneyMover
       end
     end
 
-    class VerifiedBusinessCustomer < Customer
+    class VerifiedBusinessCustomer < BaseModel
+      COMPANY_TYPES = %w( soleproprietorship llc partnership corporation )
       CONTROLER_EXEMPT_BUSINESS_TYPES = ['soleproprietorship']
 
-      # TODO type should be defined here or in a base class 'VerifiedCustomer' (instead of Customer) (note create_params already defaults it to business
-      # attr_accessor :type
+      attr_accessor :firstName,
+        :lastName,
+        :email,
+        :address1,
+        :address2,
+        :city,
+        :state,
+        :postalCode,
+        :dateOfBirth,
+        :ssn,
+        :phone,
+        :businessClassification,
+        :businessType,
+        :businessName,
+        :ein,
+        :doingBusinessAs,
+        :website,
+        :type,
+        :ipAddress,
+        :status,
+        :created
       attr_accessor :controller
 
       validates_presence_of :firstName,
@@ -115,16 +121,18 @@ module MoneyMover
         :ein
       validate :validate_associated_controller, if: :controller_required?
 
-      #validates_inclusion_of :businessType, in: COMPANY_TYPES
+      validates_inclusion_of :businessType, in: COMPANY_TYPES, message: "is invalid", if: -> { businessType.present? }
+
+      def initialize(attributes={})
+        super(attributes.merge(type: 'business'))
+      end
 
       def controller=(attrs={})
         @controller = VerifiedBusinessCustomerController.new(attrs)
       end
 
-      private
-
-      def create_params
-        create_attrs = {
+      def to_params
+        attrs = {
           firstName: firstName,
           lastName: lastName,
           email: email,
@@ -143,15 +151,16 @@ module MoneyMover
           doingBusinessAs: doingBusinessAs,
           website: website_with_protocol,
           ipAddress: ipAddress,
-          type: 'business',
-          controller: controller.to_params
+          type: type
         }
+        attrs[:controller] = controller.to_params if controller
 
         # hack to fix bug on dwolla's side with funding sources being removed if no dba is sent
-        create_attrs[:doingBusinessAs] = businessName unless doingBusinessAs.present?
-
-        create_attrs.reject{|_key, val| !val.present? }
+        attrs[:doingBusinessAs] = businessName unless doingBusinessAs.present?
+        attrs.compact
       end
+
+      private
 
       def controller_required?
         businessType.present? && !CONTROLER_EXEMPT_BUSINESS_TYPES.include?(businessType.downcase)
@@ -166,6 +175,16 @@ module MoneyMover
           end
         else
           errors.add :controller, :blank
+        end
+      end
+
+      def website_with_protocol
+        return nil unless website.present?
+
+        if website =~ %r{^https?://}
+          website
+        else
+          "http://#{website}"
         end
       end
     end

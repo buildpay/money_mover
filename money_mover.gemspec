@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'faraday_middleware', '~> 0.9'
   s.add_dependency 'activemodel', '>= 4.0'
   s.add_dependency 'activesupport', '>= 4.0'
+  s.add_dependency 'hashie', '>=3.5.7'
   s.add_dependency 'rack', '>= 1.6', '< 2.1'
 
   s.add_development_dependency 'rake', '~> 11.2'

@@ -1,38 +1,66 @@
 module MoneyMover
   module Dwolla
-    class UnverifiedBusinessCustomer < Customer
-      validates_presence_of :businessName
-      #validates_inclusion_of :businessType, in: COMPANY_TYPES
+    class UnverifiedBusinessCustomer < BaseModel
+      attr_accessor :firstName,
+        :lastName,
+        :email,
+        :ipAddress,
+        :type,
+        :created,
+        :address1,
+        :address2,
+        :city,
+        :state,
+        :postalCode,
+        :dateOfBirth,
+        :ssn,
+        :phone,
+        :businessClassification,
+        :businessType,
+        :businessName,
+        :ein,
+        :doingBusinessAs,
+        :website,
+        :ipAddress
 
-      private
+      validates_presence_of :firstName, :lastName, :email, :businessName
 
-      def create_params
-        create_attrs = {
+      def initialize(attributes = {})
+        super(attributes.merge(type: 'business'))
+      end
+
+      # TODO KLC get rid of invalid attributes!
+
+      def to_params
+        attrs = {
           firstName: firstName,
           lastName: lastName,
           email: email,
-          address1: address1,
-          address2: address2,
-          city: city,
-          state: state,
-          postalCode: postalCode,
-          dateOfBirth: dateOfBirth,
-          ssn: ssn,
-          phone: phone,
-          businessClassification: businessClassification,
-          businessType: businessType,
           businessName: businessName,
-          ein: ein,
-          doingBusinessAs: doingBusinessAs,
-          website: website_with_protocol,
-          ipAddress: ipAddress
+          doingBusinessAs: doingBusinessAs, # not required
+          ipAddress: ipAddress,
+          type: type,
+          #address1: address1,
+          #address2: address2,
+          #city: city,
+          #state: state,
+          #postalCode: postalCode,
+          #dateOfBirth: dateOfBirth,
+          #ssn: ssn,
+          #phone: phone,
+          #businessClassification: businessClassification,
+          #businessType: businessType,
+          #businessName: businessName,
+          #ein: ein,
+          #doingBusinessAs: doingBusinessAs,
+          #website: website_with_protocol,
         }
 
         # hack to fix bug on dwolla's side with funding sources being removed if no dba is sent
-        create_attrs[:doingBusinessAs] = businessName unless doingBusinessAs.present?
-        create_attrs[:type] = 'unverified'
+        attrs[:doingBusinessAs] = businessName unless doingBusinessAs.present?
+        attrs[:type] = 'unverified'
 
-        create_attrs.compact
+        attrs.compact
       end
     end
   end
