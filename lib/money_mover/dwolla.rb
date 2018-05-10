@@ -1,7 +1,7 @@
 require 'money_mover/dwolla/config'
 require 'money_mover/dwolla/api_connection'
 require 'money_mover/dwolla/api_server_response'
-require 'money_mover/dwolla/base_resource'
+require 'money_mover/dwolla/resources/base_resource'
 
 # token stuff
 require 'money_mover/dwolla/client'
@@ -31,8 +31,9 @@ require 'money_mover/dwolla/models/unverified_business_customer'
 require 'money_mover/dwolla/models/verified_business_customer'
 
 # model specific api resources
-require 'money_mover/dwolla/customer_resource'
-require 'money_mover/dwolla/customer_funding_source_resource'
+require 'money_mover/dwolla/resources/customer_resource'
+require 'money_mover/dwolla/resources/customer_funding_source_resource'
+require 'money_mover/dwolla/resources/customer_beneficial_owner_resource'
 
 # other stuff
 require 'money_mover/dwolla/request_signature_validator'

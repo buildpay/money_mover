@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe MoneyMover::Dwolla::VerifiedBusinessCustomer do
+describe MoneyMover::Dwolla::CustomerResource do
   let(:firstName) { 'first name' }
   let(:lastName) { 'last name' }
   let(:email) { 'some@example.com' }
@@ -22,9 +22,9 @@ describe MoneyMover::Dwolla::VerifiedBusinessCustomer do
 
   # TODO: add test for not being able to set type, status, created, etc. directly...
 
-  subject { described_class.new attrs }
+  subject { described_class.new }
 
-  describe '#save' do
+  describe '#create' do
     let(:attrs) {{
       firstName: firstName,
       lastName: lastName,
@@ -72,13 +72,15 @@ describe MoneyMover::Dwolla::VerifiedBusinessCustomer do
       dwolla_helper.stub_create_customer_request create_customer_params, create_response
     end
 
+    let(:customer_model) { MoneyMover::Dwolla::VerifiedBusinessCustomer.new(attrs) }
+
     context 'success' do
       let(:customer_token) { '9481924a-6795-4e7a-b436-a7a48a4141ca' }
 
       let(:create_response) { dwolla_helper.customer_created_response customer_token }
 
       it 'creates new customer in dwolla' do
-        expect(subject.save).to eq(true)
+        expect(subject.create(customer_model)).to eq(true)
 
         expect(subject.id).to eq(customer_token)
         expect(subject.resource_location).to eq(dwolla_helper.customer_endpoint(customer_token))
@@ -100,7 +102,7 @@ describe MoneyMover::Dwolla::VerifiedBusinessCustomer do
       }}
 
       it 'returns errors' do
-        expect(subject.save).to eq(false)
+        expect(subject.create(customer_model)).to eq(false)
 
         expect(subject.errors[:email]).to eq(['A customer with the specified email already exists.'])
 

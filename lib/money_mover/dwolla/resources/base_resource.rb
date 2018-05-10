@@ -37,11 +37,11 @@ module MoneyMover
         @errors = StandaloneErrors.new
       end
 
-      def self.list(params = {}, *ids)
+      def list(params = {}, *ids)
         path = get_path(:list, ids)
 
-        client = ApplicationClient.new
-        response = client.get path, santize_list_params(params)
+        params = sanitize_list_params(params)
+        response = @client.get path, params
         if response.success?
           ApiResponseMash.new(response.body)
         else
@@ -49,14 +49,13 @@ module MoneyMover
         end
       end
 
-      def self.find(id)
-        path = get_path(:find, id)
+      def find(id)
+        path = get_path(:find, [id])
 
-        client = ApplicationClient.new
-        response = client.get path
+        response = @client.get path
 
         if response.success?
-          Hashie::Mash.new(response.body)
+          ApiResponseMash.new(response.body)
         else
           raise "Error while finding #{path} - #{response.errors.full_messages}"
         end
@@ -86,14 +85,11 @@ module MoneyMover
 
         errors.clear
         if model.valid?
-          response = @client.post path, model_params
+          response = @client.post path, model.to_params
 
-          if response.success?
-            puts "Resource #{path} update success!"
-          else
+          unless response.success?
             add_errors_from response
           end
-
         else
           add_errors_from(model)
         end
@@ -106,18 +102,25 @@ module MoneyMover
 
         errors.clear
         response = @client.delete path
-        add_errors_from response unless response.success?
+
+        unless response.success?
+          add_errors_from response
+        end
         errors.empty?
       end
 
       private
+
+      def endpoint_paths
+        self.class._endpoint_paths || {}
+      end
 
       def get_path(path_key, ids)
         raise "Unsupported endpoint (#{path_key} path not defined)" unless endpoint_paths.key?(path_key)
 
         path = endpoint_paths[path_key]
         ids.flatten.compact.each do |id|
-          path = path.sub(/:\w*/, id)
+          path = path.sub(/:\w*/, id.to_s)
         end
 
         raise "Expected additional url id parameters #{endpoint_paths[path_key]} - ids:#{ids}"  if path =~ /:\w*/
@@ -127,10 +130,6 @@ module MoneyMover
 
       def list_filters
         self.class._list_filters || []
-      end
-
-      def endpoint_paths
-        self.class._endpoint_paths || {}
       end
 
       def sanitize_list_params(params)
