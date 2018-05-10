@@ -2,23 +2,6 @@ require 'spec_helper'
 
 describe 'VerifiedBusinessCustomer models' do
 
-  # Controller address
-  let(:controllerAddress1) { double 'controllerAddress1' }
-  let(:controllerAddress2) { double 'controllerAddress2' }
-  let(:controllerAddress3) { double 'controllerAddress3' }
-  let(:controllerCity) { double 'controllerCity' }
-  let(:controllerState) { double 'controllerState' }
-  let(:controllerPostalCode) { double 'controllerPostalCode' }
-  let(:controllerCountry) { double 'controllerCountry' }
-
-  # Controller passport
-  let(:controllerPassportNumber) { double 'controllerPassportNumber' }
-  let(:controllerPassportCountry) { double 'controllerPassportCountry' }
-
-  let(:passport_attrs) do
-    { number: controllerPassportNumber, country: controllerPassportCountry }
-  end
-
   # Controller
   let(:controllerFirstName) { double 'controllerFirstName' }
   let(:controllerLastName) { double 'controllerLastName' }
@@ -47,104 +30,6 @@ describe 'VerifiedBusinessCustomer models' do
   let(:website) { 'www.buildpay.co' } # default to needing 'http://' prepended
   let(:ipAddress) { double 'ip address' }
 
-
-  describe MoneyMover::Dwolla::VerifiedBusinessCustomerControllerAddress do
-    subject { described_class.new(attrs) }
-
-    let(:required_controller_address_attrs) do
-      {
-        address1: controllerAddress1,
-        city: controllerCity,
-        stateProvinceRegion: controllerState,
-        postalCode: controllerPostalCode,
-        country: controllerCountry
-      }
-    end
-
-    let(:complete_controller_address_attrs) do
-      required_controller_address_attrs.merge(
-        address2: controllerAddress2,
-        address3: controllerAddress3)
-    end
-
-    describe '#valid?' do
-      context 'valid' do
-        let(:attrs) { required_controller_address_attrs }
-
-        it 'returns true' do
-          expect(subject.valid?).to eq(true)
-        end
-      end
-
-      context 'invalid - missing required attrs' do
-        let(:attrs) { {} }
-
-        it 'returns false' do
-          expect(subject.valid?).to eq(false)
-          expect(subject.errors.full_messages).to eq([
-            "Address1 can't be blank",
-            "City can't be blank",
-            "Stateprovinceregion can't be blank",
-            "Postalcode can't be blank",
-            "Country can't be blank"
-          ])
-        end
-      end
-    end
-
-    describe '#to_params' do
-      let(:attrs) { complete_controller_address_attrs }
-
-      it 'returns expected values' do
-        expect(subject.to_params).to eq({
-          address1: controllerAddress1,
-          address2: controllerAddress2,
-          address3: controllerAddress3,
-          city: controllerCity,
-          stateProvinceRegion: controllerState,
-          postalCode: controllerPostalCode,
-          country: controllerCountry
-        })
-      end
-    end
-  end
-
-  describe MoneyMover::Dwolla::VerifiedBusinessCustomerControllerPassport do
-    subject { described_class.new(attrs) }
-
-    describe '#valid?' do
-      context 'valid' do
-        let(:attrs) { passport_attrs }
-
-        it 'returns true' do
-          expect(subject.valid?).to eq(true)
-        end
-      end
-
-      context 'invalid' do
-        let(:attrs) { {} }
-
-        it 'returns false' do
-          expect(subject.valid?).to eq(false)
-          expect(subject.errors.full_messages).to eq([
-            "Number can't be blank",
-            "Country can't be blank"
-          ])
-        end
-      end
-    end
-
-    describe '#to_params' do
-      let(:attrs) { passport_attrs }
-
-      it 'returns expected values' do
-        expect(subject.to_params).to eq({
-          number: controllerPassportNumber,
-          country: controllerPassportCountry
-        })
-      end
-    end
-  end
 
   describe MoneyMover::Dwolla::VerifiedBusinessCustomerController do
     subject { described_class.new(attrs) }
@@ -183,8 +68,8 @@ describe 'VerifiedBusinessCustomer models' do
     let(:controller_address) { double 'controller address', valid?: address_valid?, errors: address_errors, to_params: address_to_params }
 
     before do
-      allow(MoneyMover::Dwolla::VerifiedBusinessCustomerControllerPassport).to receive(:new).with(controller_passport_params) { controller_passport }
-      allow(MoneyMover::Dwolla::VerifiedBusinessCustomerControllerAddress).to receive(:new).with(controller_address_params) { controller_address }
+      allow(MoneyMover::Dwolla::Passport).to receive(:new).with(controller_passport_params) { controller_passport }
+      allow(MoneyMover::Dwolla::ExtendedAddress).to receive(:new).with(controller_address_params) { controller_address }
     end
 
     describe '#valid?' do
@@ -192,7 +77,7 @@ describe 'VerifiedBusinessCustomer models' do
         let(:attrs) { required_controller_attrs }
 
         it 'returns true' do
-          expect(MoneyMover::Dwolla::VerifiedBusinessCustomerControllerPassport).to_not receive(:new)
+          expect(MoneyMover::Dwolla::Passport).to_not receive(:new)
           expect(controller_address).to receive(:valid?)
 
           expect(subject.valid?).to eq(true)
@@ -216,8 +101,8 @@ describe 'VerifiedBusinessCustomer models' do
         let(:attrs) { {} }
 
         it 'returns false' do
-          expect(MoneyMover::Dwolla::VerifiedBusinessCustomerControllerAddress).to_not receive(:new)
-          expect(MoneyMover::Dwolla::VerifiedBusinessCustomerControllerPassport).to_not receive(:new)
+          expect(MoneyMover::Dwolla::ExtendedAddress).to_not receive(:new)
+          expect(MoneyMover::Dwolla::Passport).to_not receive(:new)
 
           expect(subject.valid?).to eq(false)
 
@@ -237,7 +122,7 @@ describe 'VerifiedBusinessCustomer models' do
         let(:address_valid?) { false }
 
         it 'returns false' do
-          expect(MoneyMover::Dwolla::VerifiedBusinessCustomerControllerPassport).to_not receive(:new)
+          expect(MoneyMover::Dwolla::Passport).to_not receive(:new)
           expect(controller_address).to receive(:valid?)
 
           expect(subject.valid?).to eq(false)

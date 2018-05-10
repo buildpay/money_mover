@@ -15,6 +15,8 @@ require 'money_mover/dwolla/error_handler'
 require 'money_mover/dwolla/models/api_resource'
 # models
 require 'money_mover/dwolla/models/base_model'
+require 'money_mover/dwolla/models/extended_address'
+require 'money_mover/dwolla/models/passport'
 require 'money_mover/dwolla/models/account_funding_source'
 require 'money_mover/dwolla/models/document'
 require 'money_mover/dwolla/models/customer_funding_source'

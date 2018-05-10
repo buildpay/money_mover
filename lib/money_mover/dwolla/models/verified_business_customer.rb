@@ -1,38 +1,5 @@
 module MoneyMover
   module Dwolla
-    class VerifiedBusinessCustomerControllerAddress < BaseModel
-      attr_accessor :address1, :address2, :address3,
-        :city, :stateProvinceRegion, :postalCode, :country
-
-      validates_presence_of :address1,
-        :city,
-        :stateProvinceRegion,
-        :postalCode,
-        :country
-
-      def to_params
-        {
-          address1: address1,
-          address2: address2,
-          address3: address3,
-          city: city,
-          stateProvinceRegion: stateProvinceRegion,
-          postalCode: postalCode,
-          country: country
-        }
-      end
-    end
-
-    class VerifiedBusinessCustomerControllerPassport < BaseModel
-      attr_accessor :number, :country
-
-      validates_presence_of :number, :country
-
-      def to_params
-        { number: number, country: country }
-      end
-    end
-
     class VerifiedBusinessCustomerController < BaseModel
       attr_accessor :firstName, :lastName, :title, :dateOfBirth, :ssn
       attr_reader :passport, :address
@@ -42,11 +9,11 @@ module MoneyMover
       validate :validate_ssn_or_passport
 
       def passport=(attrs={})
-        @passport = VerifiedBusinessCustomerControllerPassport.new(attrs)
+        @passport = Passport.new(attrs)
       end
 
       def address=(attrs={})
-        @address = VerifiedBusinessCustomerControllerAddress.new(attrs)
+        @address = ExtendedAddress.new(attrs)
       end
 
       def to_params

@@ -1,6 +1,6 @@
 module MoneyMover
   module Dwolla
-    class CustomerBeneficialOwner < ApiResource
+    class CustomerBeneficialOwner < BaseModel
       attr_accessor :firstName,
         :lastName,
         :ssn,
@@ -24,47 +24,20 @@ module MoneyMover
 
       validate :official_identifier_valid
 
-      def initialize(customer_id, attrs={})
-        @customer_id = customer_id
-        super attrs
-      end
 
-      def self.find(id)
-        client = ApplicationClient.new
-
-        response = client.get fetch_endpoint(id)
-
-        if response.success?
-          new response.body
-        else
-          raise 'Customer Beneficial Owner Not Found'
-          #puts "error: #{response.body}"
-        end
-      end
-
-      private
-
-      def fetch_endpoint(id)
-        "/beneficial-owners/#{id}"
-      end
-
-      def create_endpoint
-        "/customers/#{@customer_id}/beneficial-owners"
-      end
-
-      def create_params
-        create_attrs = {
+      def to_params
+        attrs = {
           firstName: firstName,
           lastName: lastName,
           ssn: ssn,
           dateOfBirth: dateOfBirth,
           address: address_params,
           passport: passport_params
-        }.reject{|_key, val| !val.present? }
+        }.compact
       end
 
       def address_params
-        {
+        attrs = {
           address1: address1,
           address2: address2,
           address3: address3,
@@ -72,17 +45,17 @@ module MoneyMover
           state: state,
           postalCode: postalCode,
           country: country
-        }.reject{|_key, val| !val.present? }
+        }
       end
 
       def passport_params
         {
           number: passportNumber,
           country: passportCountry
-        }.reject{|_key, val| !val.present? }
+        }
       end
 
-      def official_identifier_valid
+      def validate_identifier_valid
         unless ssn.present? ||
             (passportNumber.present? && passportCountry.present?)
           errors.add :base, "Controller SSN or Passport information must be provided"
