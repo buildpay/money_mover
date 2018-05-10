@@ -45,7 +45,7 @@ module MoneyMover
         if response.success?
           ApiResponseMash.new(response.body)
         else
-          raise "Error while fetching #{path} params:#{params} - #{response.errors.full_messages}"
+          raise "Error fetching #{path} params:#{params} - #{response.errors.full_messages}"
         end
       end
 
@@ -57,7 +57,7 @@ module MoneyMover
         if response.success?
           ApiResponseMash.new(response.body)
         else
-          raise "Error while finding #{path} - #{response.errors.full_messages}"
+          raise "Error finding #{path} - #{response.errors.full_messages}"
         end
       end
 

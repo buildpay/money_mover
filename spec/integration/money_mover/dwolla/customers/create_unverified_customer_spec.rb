@@ -1,15 +1,13 @@
 require 'spec_helper'
 
 describe MoneyMover::Dwolla::CustomerResource do
-  describe 'update UnverifiedCustomer' do
-    let(:customer_token) { '9481924a-6795-4e7a-b436-a7a48a4141ca' }
+  describe 'create unverified customer' do
     let(:firstName) { 'first name' }
     let(:lastName) { 'last name' }
     let(:email) { 'some@example.com' }
     let(:ipAddress) { '127.0.0.1' }
 
     let(:attrs) {{
-      id: customer_token,
       firstName: firstName,
       lastName: lastName,
       email: email,
@@ -19,7 +17,9 @@ describe MoneyMover::Dwolla::CustomerResource do
     let(:customer_model) { MoneyMover::Dwolla::UnverifiedCustomer.new(attrs) }
     subject { described_class.new }
 
-    let(:update_customer_params) {{
+    let(:customer_token) { '9481924a-6795-4e7a-b436-a7a48a4141ca' }
+
+    let(:create_customer_params) {{
       firstName: firstName,
       lastName: lastName,
       email: email,
@@ -28,25 +28,34 @@ describe MoneyMover::Dwolla::CustomerResource do
     }}
 
     before do
-      dwolla_helper.stub_update_customer_request customer_token, update_customer_params, update_response
+      dwolla_helper.stub_create_customer_request create_customer_params, create_response
     end
 
-    describe '#update' do
+    describe '#create' do
       context 'success' do
-        let(:update_response) do
-          {
-            status: 200,
-            body: ""
-          }
-        end
+        let(:create_response) { dwolla_helper.customer_created_response customer_token }
 
         it 'creates new customer in dwolla' do
-          expect(subject.update(customer_model, customer_token)).to eq(true)
+          expect(customer_model.valid?).to eq(true)
+          expect(subject.create(customer_model)).to eq(true)
+          expect(subject.id).to eq(customer_token)
+          expect(subject.resource_location).to eq(dwolla_helper.customer_endpoint(customer_token))
         end
       end
 
       context 'fail' do
-        let(:update_response) { dwolla_helper.resource_create_error_response error_response }
+        let(:create_response) { dwolla_helper.resource_create_error_response error_response }
+
+        #let(:error_response) {{
+        #code: "ValidationError",
+        #message: "Validation error(s) present. See embedded errors list for more details.",
+        #_embedded: {
+        #errors: [
+        #{ code: "Invalid", message: "Invalid parameter.", path: "/firstName"
+        #}
+        #]
+        #}
+        #}}
 
         let(:error_response) {{
           code: "ValidationError",
@@ -60,8 +69,10 @@ describe MoneyMover::Dwolla::CustomerResource do
         }}
 
         it 'returns errors' do
-          expect(subject.update(customer_model, customer_token)).to eq(false)
+          expect(subject.create(customer_model)).to eq(false)
           expect(subject.errors[:email]).to eq(['A customer with the specified email already exists.'])
+          expect(subject.id).to be_nil
+          expect(subject.resource_location).to be_nil
         end
       end
     end

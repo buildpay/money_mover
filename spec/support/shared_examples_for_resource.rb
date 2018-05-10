@@ -75,7 +75,7 @@ shared_examples_for 'base resource list' do
       it 'raises error' do
         expect(client).to receive(:get).with(expected_path, params)
 
-        expect{ subject.list(params, id) }.to raise_error("Error while fetching #{expected_path} params:#{params} - #{error_messages}")
+        expect{ subject.list(params, id) }.to raise_error("Error fetching #{expected_path} params:#{params} - #{error_messages}")
       end
     end
   end
@@ -103,7 +103,7 @@ shared_examples_for 'base resource find' do
       it 'raises error' do
         expect(client).to receive(:get).with(expected_path)
 
-        expect{ subject.find(id) }.to raise_error("Error while finding #{expected_path} - #{error_messages}")
+        expect{ subject.find(id) }.to raise_error("Error finding #{expected_path} - #{error_messages}")
       end
     end
   end

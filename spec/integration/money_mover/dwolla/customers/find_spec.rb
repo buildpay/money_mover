@@ -1,19 +1,19 @@
 require 'spec_helper'
 
-describe MoneyMover::Dwolla::Customer do
-  let(:customer_token) { '9481924a-6795-4e7a-b436-a7a48a4141ca' }
+describe MoneyMover::Dwolla::CustomerResource do
+  describe '#find' do
+    let(:customer_token) { '9481924a-6795-4e7a-b436-a7a48a4141ca' }
 
-  let(:firstName) { 'first name' }
-  let(:lastName) { 'last name' }
-  let(:email) { 'email@example.com' }
-  let(:ipAddress) { '127.0.0.1' }
+    let(:firstName) { 'first name' }
+    let(:lastName) { 'last name' }
+    let(:email) { 'email@example.com' }
+    let(:ipAddress) { '127.0.0.1' }
 
-  before do
-    dwolla_helper.stub_find_customer_request customer_token, customer_response
-  end
+    before do
+      dwolla_helper.stub_find_customer_request customer_token, customer_response
+    end
 
-  describe '.find' do
-    subject { described_class.find(customer_token) }
+    subject { described_class.new.find(customer_token) }
 
     context 'success' do
       let(:timestamp) { DateTime.now.to_s }
@@ -69,16 +69,20 @@ describe MoneyMover::Dwolla::Customer do
     context 'failure' do
       let(:response_body) {{
         code: 'Something',
-        message: 'Customer not found.'
+        message: 'Resource not found.'
       }}
 
       let(:customer_response) {{
         status: 404,
-        body: response_body.to_json
+        body: response_body.to_json,
+        headers: {
+          'Content-Type' => 'application/json'
+        }
       }}
 
       it 'returns errors' do
-        expect { subject }.to raise_error('Customer Not Found')
+        expect{ described_class.new.find(customer_token) }.to raise_error("Error finding /customers/#{customer_token} - [\"Resource not found.\"]")
+        #expect { subject }.to raise_error('Customer Not Found')
       end
     end
   end

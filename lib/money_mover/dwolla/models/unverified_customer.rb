@@ -1,22 +1,31 @@
 module MoneyMover
   module Dwolla
-    class UnverifiedCustomer < Customer
-      private
+    class UnverifiedCustomer < BaseModel
+      attr_accessor :firstName,
+        :lastName,
+        :email,
+        :type,
+        :businessName,
+        :ipAddress,
+        :status,
+        :created
 
       validates_presence_of :firstName, :lastName, :email
 
-      def create_params
-        create_attrs = {
+      def initialize(attributes={})
+        super(attributes.merge(type: 'unverified'))
+      end
+
+      def to_params
+        attrs = {
           firstName: firstName,
           lastName: lastName,
-          email: email
+          email: email,
+          type: type
         }
-
-        create_attrs[:businessName] = businessName if businessName.present?
-        create_attrs[:ipAddress] = ipAddress if ipAddress.present?
-        create_attrs[:type] = 'unverified'
-
-        create_attrs
+        attrs[:businessName] = businessName if businessName.present?
+        attrs[:ipAddress] = ipAddress if ipAddress.present?
+        attrs
       end
     end
   end
