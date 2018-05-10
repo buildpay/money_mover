@@ -30,6 +30,7 @@ require 'money_mover/dwolla/models/receive_only_customer'
 require 'money_mover/dwolla/models/receive_only_business_customer'
 require 'money_mover/dwolla/models/unverified_customer'
 require 'money_mover/dwolla/models/unverified_business_customer'
+require 'money_mover/dwolla/models/customer_beneficial_owner'
 require 'money_mover/dwolla/models/verified_business_customer'
 
 # model specific api resources

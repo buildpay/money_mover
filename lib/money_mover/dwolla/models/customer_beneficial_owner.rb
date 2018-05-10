@@ -1,64 +1,46 @@
 module MoneyMover
   module Dwolla
     class CustomerBeneficialOwner < BaseModel
-      attr_accessor :firstName,
-        :lastName,
-        :ssn,
-        :dateOfBirth,
-        :address1,
-        :address2,
-        :address3,
-        :city,
-        :state,
-        :postalCode,
-        :passportNumber,
-        :passportCountry
+      attr_accessor :firstName, :lastName, :dateOfBirth, :ssn
+      attr_reader :passport, :address
 
-      validates_presence_of :firstName,
-        :lastName,
-        :dateOfBirth,
-        :address1,
-        :city,
-        :state,
-        :postalCode
+      validates_presence_of :firstName, :lastName, :dateOfBirth, :address
+      validate :validate_associated_address, if: -> { address.present? }
+      validate :validate_ssn_or_passport
 
-      validate :official_identifier_valid
+      def passport=(attrs={})
+        @passport = Passport.new(attrs)
+      end
 
+      def address=(attrs={})
+        @address = ExtendedAddress.new(attrs)
+      end
 
       def to_params
         attrs = {
           firstName: firstName,
           lastName: lastName,
-          ssn: ssn,
-          dateOfBirth: dateOfBirth,
-          address: address_params,
-          passport: passport_params
-        }.compact
-      end
-
-      def address_params
-        attrs = {
-          address1: address1,
-          address2: address2,
-          address3: address3,
-          city: city,
-          state: state,
-          postalCode: postalCode,
-          country: country
+          dateOfBirth: dateOfBirth
         }
+        attrs[:address] = address.to_params if address
+        attrs[:ssn] = ssn if ssn
+        attrs[:passport] = passport.to_params if passport
+        attrs
       end
 
-      def passport_params
-        {
-          number: passportNumber,
-          country: passportCountry
-        }
+      private
+
+      def validate_associated_address
+        unless address.valid?
+          address.errors.full_messages.each do |message|
+            errors.add :address, message
+          end
+        end
       end
 
-      def validate_identifier_valid
-        unless ssn.present? ||
-            (passportNumber.present? && passportCountry.present?)
-          errors.add :base, "Controller SSN or Passport information must be provided"
+      def validate_ssn_or_passport
+        unless ssn.present? || (passport.present? && passport.valid?)
+          errors.add :base, "SSN or Passport information must be provided"
         end
       end
     end
