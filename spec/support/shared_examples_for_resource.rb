@@ -226,7 +226,6 @@ shared_examples_for 'base resource destroy' do
   #let(:id) { 777 }
   #let(:expected_config_path) { '/customers/:id' }
   #let(:expected_path) { "/customers/#{id}"}
-  #
   include_context 'shared base resource setup'
 
   describe '#destroy' do

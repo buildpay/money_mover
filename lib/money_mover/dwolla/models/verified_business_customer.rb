@@ -66,11 +66,11 @@ module MoneyMover
         :ein,
         :doingBusinessAs,
         :website,
-        :type,
         :ipAddress,
         :status,
         :created
       attr_accessor :controller
+      attr_reader :type
 
       validates_presence_of :firstName,
         :lastName,
@@ -91,7 +91,8 @@ module MoneyMover
       validates_inclusion_of :businessType, in: COMPANY_TYPES, message: "is invalid", if: -> { businessType.present? }
 
       def initialize(attributes={})
-        super(attributes.merge(type: 'business'))
+        @type = 'business'
+        super
       end
 
       def controller=(attrs={})

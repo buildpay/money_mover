@@ -23,8 +23,7 @@ describe MoneyMover::Dwolla::CustomerResource do
       firstName: firstName,
       lastName: lastName,
       email: email,
-      ipAddress: ipAddress,
-      type: 'unverified'
+      ipAddress: ipAddress
     }}
 
     before do

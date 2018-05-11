@@ -1,11 +1,14 @@
 module MoneyMover
   module Dwolla
     class ReceiveOnlyCustomer < BaseModel
-      attr_accessor :firstName, :lastName, :email, :ipAddress, :type
+      attr_accessor :firstName, :lastName, :email, :businessName, :ipAddress
+      attr_reader :type
+
       validates_presence_of :firstName, :lastName, :email
 
       def initialize(attributes={})
-        super(attributes.merge(type: 'receive-only'))
+        @type = 'receive-only'
+        super
       end
 
       def to_params
@@ -13,8 +16,9 @@ module MoneyMover
           firstName: firstName,
           lastName: lastName,
           email: email,
-          type: type,
+          type: type
         }
+        attrs[:businessName] = businessName if businessName.present?
         attrs[:ipAddress] = ipAddress if ipAddress.present?
         attrs
       end
