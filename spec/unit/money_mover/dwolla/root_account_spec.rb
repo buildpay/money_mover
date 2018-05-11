@@ -19,7 +19,7 @@ describe MoneyMover::Dwolla::RootAccount do
     }
   end
 
-  let(:funding_response) { double 'funding response', body: funding_response_body }
+  let(:funding_response) { double 'funding response', success?: true, body: funding_response_body }
 
   let(:funding_response_body) do
     {
@@ -71,16 +71,15 @@ describe MoneyMover::Dwolla::RootAccount do
   before do
     allow(MoneyMover::Dwolla::ApplicationClient).to receive(:new) { client }
     allow(client).to receive(:get).with('/') { account_response }
-    allow(client).to receive(:get).with("/accounts/#{account_token}/funding-sources") { funding_response }
+    allow(client).to receive(:get).with("/accounts/#{account_token}/funding-sources", {}) { funding_response }
   end
 
-  describe '.fetch' do
-    subject { described_class }
+  describe '.initialize' do
+    subject { described_class.new }
 
     it 'returns expected token hash' do
-      account = subject.fetch
-      expect(account.account_resource_id).to eq(account_token)
-      expect(account.bank_account_funding_source.id).to eq(bank_funding_source_token)
+      expect(subject.account_resource_id).to eq(account_token)
+      expect(subject.bank_account_funding_source.id).to eq(bank_funding_source_token)
     end
   end
 end
