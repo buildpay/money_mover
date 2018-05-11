@@ -46,17 +46,6 @@ describe MoneyMover::Dwolla::CustomerResource do
       context 'fail' do
         let(:create_response) { dwolla_helper.resource_create_error_response error_response }
 
-        #let(:error_response) {{
-        #code: "ValidationError",
-        #message: "Validation error(s) present. See embedded errors list for more details.",
-        #_embedded: {
-        #errors: [
-        #{ code: "Invalid", message: "Invalid parameter.", path: "/firstName"
-        #}
-        #]
-        #}
-        #}}
-
         let(:error_response) {{
           code: "ValidationError",
           message: "Validation error(s) present. See embedded errors list for more details.",

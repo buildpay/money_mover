@@ -87,6 +87,14 @@ class DwollaHelper
     [ customer_funding_sources_endpoint(customer_token), funding_source_token ].join '/'
   end
 
+  def customer_beneficial_owners_endpoint(customer_token)
+    [ customer_endpoint(customer_token), 'beneficial-owners' ].join '/'
+  end
+
+  def customer_beneficial_owner_endpoint(customer_token, beneficial_owner_token)
+    [ customer_beneficial_owners_endpoint(customer_token), beneficial_owner_token ].join '/'
+  end
+
   def request_headers
     {
       'Accept'=>'application/vnd.dwolla.v1.hal+json',
@@ -111,6 +119,10 @@ class DwollaHelper
 
   def customer_funding_source_created_response(customer_token, funding_source_token)
     resource_created_response customer_funding_source_endpoint(customer_token, funding_source_token)
+  end
+
+  def customer_beneficial_owner_created_response(customer_token, beneficial_owner_token)
+    resource_created_response customer_beneficial_owner_endpoint(customer_token, beneficial_owner_token)
   end
 
   def customer_documents_endpoint(customer_token)
@@ -173,6 +185,10 @@ class DwollaHelper
 
   def stub_create_customer_funding_source_request(customer_token, params, response)
     stub_post_request customer_funding_sources_endpoint(customer_token), params, response
+  end
+
+  def stub_create_customer_beneficial_owner_request(customer_token, params, response)
+    stub_post_request customer_beneficial_owners_endpoint(customer_token), params, response
   end
 
   def stub_find_customer_request(customer_token, response)
