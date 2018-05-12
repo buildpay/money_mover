@@ -31,6 +31,7 @@ require 'money_mover/dwolla/models/unverified_customer'
 require 'money_mover/dwolla/models/unverified_business_customer'
 require 'money_mover/dwolla/models/customer_beneficial_owner'
 require 'money_mover/dwolla/models/verified_business_customer'
+require 'money_mover/dwolla/models/webhook_subscription'
 
 # model specific api resources
 require 'money_mover/dwolla/resources/account_funding_source_resource'
@@ -40,10 +41,10 @@ require 'money_mover/dwolla/resources/micro_deposit_resource'
 require 'money_mover/dwolla/resources/customer_beneficial_owner_resource'
 require 'money_mover/dwolla/resources/customer_transfer_resource'
 require 'money_mover/dwolla/resources/customer_document_resource'
+require 'money_mover/dwolla/resources/webhook_subscription_resource'
 
 # other stuff
 require 'money_mover/dwolla/request_signature_validator'
-require 'money_mover/dwolla/models/webhook_subscription'
 
 module MoneyMover
   module Dwolla
