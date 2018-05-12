@@ -13,8 +13,6 @@ require 'money_mover/dwolla/root_account' # helper to get dwolla api account inf
 require 'money_mover/dwolla/environment_urls'
 require 'money_mover/dwolla/error_handler'
 
-require 'money_mover/dwolla/models/api_resource'
-
 # models
 require 'money_mover/dwolla/models/base_model'
 require 'money_mover/dwolla/models/extended_address'
@@ -24,7 +22,6 @@ require 'money_mover/dwolla/models/customer_funding_source'
 require 'money_mover/dwolla/models/micro_deposit_verification'
 require 'money_mover/dwolla/models/transfer'
 # customer models
-require 'money_mover/dwolla/models/customer'
 require 'money_mover/dwolla/models/receive_only_customer'
 require 'money_mover/dwolla/models/receive_only_business_customer'
 require 'money_mover/dwolla/models/unverified_customer'
