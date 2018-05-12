@@ -49,8 +49,8 @@ module MoneyMover
         end
       end
 
-      def find(id)
-        path = get_path(:find, [id])
+      def find(*ids)
+        path = get_path(:find, ids)
 
         response = @client.get path
 
@@ -118,13 +118,18 @@ module MoneyMover
       def get_path(path_key, ids)
         raise "Unsupported endpoint (#{path_key} path not defined)" unless endpoint_paths.key?(path_key)
 
-        path = endpoint_paths[path_key]
+        path_template = endpoint_paths[path_key]
+        path = format_path(path_template, ids)
+
+        raise "Expected additional url id parameters #{path_template} - ids:#{ids}"  if path =~ /:\w*/
+
+        path
+      end
+
+      def format_path(path, ids)
         ids.flatten.compact.each do |id|
           path = path.sub(/:\w*/, id.to_s)
         end
-
-        raise "Expected additional url id parameters #{endpoint_paths[path_key]} - ids:#{ids}"  if path =~ /:\w*/
-
         path
       end
 
