@@ -38,6 +38,7 @@ require 'money_mover/dwolla/resources/account_funding_source_resource'
 require 'money_mover/dwolla/resources/customer_resource'
 require 'money_mover/dwolla/resources/customer_funding_source_resource'
 require 'money_mover/dwolla/resources/customer_beneficial_owner_resource'
+require 'money_mover/dwolla/resources/customer_transfer_resource'
 
 # other stuff
 require 'money_mover/dwolla/request_signature_validator'

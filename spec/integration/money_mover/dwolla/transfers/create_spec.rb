@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe MoneyMover::Dwolla::Transfer do
+describe 'create a transfer' do
   let(:funding_source_resource_location) { 'some-resource-location' }
   let(:funding_destination_resource_location) { 'some-resource-location' }
   let(:amount) { 10.0 }
@@ -20,7 +20,8 @@ describe MoneyMover::Dwolla::Transfer do
     metadata: metadata
   }}
 
-  subject { described_class.new(attrs) }
+  let(:transfer_model) { MoneyMover::Dwolla::Transfer.new(attrs) }
+  subject { MoneyMover::Dwolla::CustomerTransferResource.new }
 
   let(:create_params) {{
     _links: {
@@ -44,12 +45,12 @@ describe MoneyMover::Dwolla::Transfer do
     dwolla_helper.stub_create_transfer_request create_params, create_response
   end
 
-  describe '#save' do
+  describe '#create' do
     context 'success' do
       let(:create_response) { dwolla_helper.transfer_created_response resource_token }
 
       it 'creates new resource in dwolla' do
-        expect(subject.save).to eq(true)
+        expect(subject.create(transfer_model)).to eq(true)
         expect(subject.id).to eq(resource_token)
         expect(subject.resource_location).to eq(dwolla_helper.transfer_endpoint(resource_token))
       end
@@ -70,7 +71,7 @@ describe MoneyMover::Dwolla::Transfer do
       }}
 
       it 'returns errors' do
-        expect(subject.save).to eq(false)
+        expect(subject.create(transfer_model)).to eq(false)
         expect(subject.errors[:_links]).to eq(['Invalid destination'])
         expect(subject.id).to be_nil
         expect(subject.resource_location).to be_nil

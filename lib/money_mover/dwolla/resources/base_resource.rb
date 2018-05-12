@@ -13,7 +13,7 @@ module MoneyMover
 
     class BaseResource
       attr_accessor :id, :resource_location
-      attr_reader :errors
+      attr_reader :client, :errors
 
       ACTIONS = [:list, :find, :create, :update, :destroy]
 

@@ -1,24 +1,18 @@
 module MoneyMover
   module Dwolla
-    class Transfer < ApiResource
+    class Transfer < BaseModel
       attr_accessor :sender_funding_source_token, :destination_funding_source_token, :transfer_amount, :metadata
 
       validates_presence_of :sender_funding_source_token, :destination_funding_source_token, :transfer_amount
 
-      private
-
-      def create_endpoint
-        "/transfers"
-      end
-
-      def create_params
+      def to_params
         {
           _links: {
             destination: {
-              href: "#{@client.api_url}/funding-sources/#{@destination_funding_source_token}"
+              href: "#{api_url}/funding-sources/#{@destination_funding_source_token}"
             },
             source: {
-              href: "#{@client.api_url}/funding-sources/#{@sender_funding_source_token}"
+              href: "#{api_url}/funding-sources/#{@sender_funding_source_token}"
             }
           },
           amount: {
@@ -27,6 +21,13 @@ module MoneyMover
           },
           metadata: @metadata
         }
+      end
+
+      private
+
+      # TODO petition Dwolla not require full urls as part of our parameter values!
+      def api_url
+        @api_url ||= EnvironmentUrls.new.api_url
       end
     end
   end
