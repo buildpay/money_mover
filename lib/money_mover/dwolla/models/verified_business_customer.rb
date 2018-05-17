@@ -17,15 +17,16 @@ module MoneyMover
       end
 
       def to_params
-        {
+        params = {
           firstName: firstName,
           lastName: lastName,
           title: title,
           dateOfBirth: dateOfBirth,
           ssn: ssn,
-          passport: passport ? passport.to_params : nil,
           address: address ? address.to_params : nil
-        }.compact
+        }
+        params[:passport] = passport.to_params unless params[:ssn]
+        params.compact
       end
 
       private
@@ -65,7 +66,6 @@ module MoneyMover
         :businessName,
         :ein,
         :doingBusinessAs,
-        :website,
         :ipAddress,
         :status,
         :created
@@ -79,16 +79,16 @@ module MoneyMover
         :city,
         :state,
         :postalCode,
-        :dateOfBirth,
-        :ssn,
-        :phone,
         :businessClassification,
         :businessType,
-        :businessName,
-        :ein
-      validate :validate_associated_controller, if: :controller_required?
+        :businessName
 
       validates_inclusion_of :businessType, in: COMPANY_TYPES, message: "is invalid", if: -> { businessType.present? }
+
+      validates_presence_of :ssn, :dateOfBirth, unless: :controller_required?
+
+      validates_presence_of :ein, if: :controller_required?
+      validate :validate_associated_controller, if: :controller_required?
 
       def initialize(attributes={})
         @type = 'business'
@@ -104,27 +104,29 @@ module MoneyMover
           firstName: firstName,
           lastName: lastName,
           email: email,
+          phone: phone,
           address1: address1,
           address2: address2,
           city: city,
           state: state,
           postalCode: postalCode,
-          dateOfBirth: dateOfBirth,
-          ssn: ssn,
-          phone: phone,
           businessClassification: businessClassification,
           businessType: businessType,
           businessName: businessName,
-          ein: ein,
-          doingBusinessAs: doingBusinessAs,
-          website: website_with_protocol,
+          doingBusinessAs: doingBusinessAs.present? ? doingBusinessAs : businessName, # hack to fix bug on dwolla's side with funding sources being removed if no dba is sent (TODO still a problem?)
           ipAddress: ipAddress,
           type: type
         }
-        attrs[:controller] = controller.to_params if controller
 
-        # hack to fix bug on dwolla's side with funding sources being removed if no dba is sent
-        attrs[:doingBusinessAs] = businessName unless doingBusinessAs.present?
+        if controller_required?
+          attrs[:ein] = ein
+        else  # soleproprietorship
+          attrs[:ssn] = ssn
+          attrs[:dateOfBirth] = dateOfBirth
+        end
+
+        attrs[:controller] = controller.to_params if controller_required? && controller
+
         attrs.compact
       end
 
@@ -143,16 +145,6 @@ module MoneyMover
           end
         else
           errors.add :controller, :blank
-        end
-      end
-
-      def website_with_protocol
-        return nil unless website.present?
-
-        if website =~ %r{^https?://}
-          website
-        else
-          "http://#{website}"
         end
       end
     end

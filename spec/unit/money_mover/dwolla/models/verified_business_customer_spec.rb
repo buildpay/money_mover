@@ -27,7 +27,6 @@ describe 'VerifiedBusinessCustomer models' do
   let(:businessName) { double 'business name' }
   let(:ein) { double 'ein' }
   let(:doingBusinessAs) { double 'dba' }
-  let(:website) { 'www.buildpay.co' } # default to needing 'http://' prepended
   let(:ipAddress) { double 'ip address' }
 
 
@@ -151,15 +150,13 @@ describe 'VerifiedBusinessCustomer models' do
           attrs
         end
 
-        it 'returns expected values' do
-
+        it 'returns expected values (excludes passport)' do
           expect(subject.to_params).to eq({
             firstName: controllerFirstName,
             lastName: controllerLastName,
             title: controllerTitle,
             dateOfBirth: controllerDateOfBirth,
             ssn: controllerSsn,
-            passport: passport_to_params,
             address: address_to_params
           })
         end
@@ -188,7 +185,7 @@ describe 'VerifiedBusinessCustomer models' do
   describe MoneyMover::Dwolla::VerifiedBusinessCustomer do
     subject { described_class.new(attrs) }
 
-    let(:required_customer_attrs) do
+    let(:required_soleproprietor_customer_attrs) do
       {
         firstName: firstName,
         lastName: lastName,
@@ -199,7 +196,30 @@ describe 'VerifiedBusinessCustomer models' do
         postalCode: postalCode,
         dateOfBirth: dateOfBirth,
         ssn: ssn,
+        businessClassification: businessClassification,
+        businessType: businessType,
+        businessName: businessName,
+      }
+    end
+
+    let(:complete_soleproprietor_customer_attrs) do
+      required_soleproprietor_customer_attrs.merge(
+        address2: address2,
         phone: phone,
+        doingBusinessAs: doingBusinessAs,
+        ipAddress: ipAddress
+      )
+    end
+
+    let(:required_non_soleproprietor_customer_attrs) do
+      {
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        address1: address1,
+        city: city,
+        state: state,
+        postalCode: postalCode,
         businessClassification: businessClassification,
         businessType: businessType,
         businessName: businessName,
@@ -207,11 +227,11 @@ describe 'VerifiedBusinessCustomer models' do
       }
     end
 
-    let(:complete_customer_attrs) do
-      required_customer_attrs.merge(
+    let(:complete_non_soleproprietor_customer_attrs) do
+      required_non_soleproprietor_customer_attrs.merge(
         address2: address2,
+        phone: phone,
         doingBusinessAs: doingBusinessAs,
-        website: website,
         ipAddress: ipAddress
       )
     end
@@ -226,46 +246,114 @@ describe 'VerifiedBusinessCustomer models' do
     end
 
     describe '#valid?' do
-      context 'valid - businessType soleproprietorhip (no controller required nor set)' do
-        let(:attrs) { required_customer_attrs }
+      context 'businessType is soleproprietorship (ein and controller NOT required)' do
         let(:businessType) { 'soleproprietorship' }
+        let(:required_customer_attrs) { required_soleproprietor_customer_attrs }
+        let(:complete_customer_attrs) { complete_soleproprietor_customer_attrs }
 
-        it 'returns true' do
-          expect(MoneyMover::Dwolla::VerifiedBusinessCustomerController).to_not receive(:new)
-          expect(subject.valid?).to eq(true)
-          expect(subject.errors).to be_empty
+        context 'valid - (ein and controller NOT set)' do
+          let(:attrs) { required_customer_attrs }
+
+          it 'returns true' do
+            expect(MoneyMover::Dwolla::VerifiedBusinessCustomerController).to_not receive(:new)
+            expect(subject.valid?).to eq(true)
+            expect(subject.errors).to be_empty
+          end
+        end
+
+        context 'valid - complete set of customer attrs' do
+          let(:attrs) { complete_customer_attrs }
+
+          it 'returns true' do
+            expect(MoneyMover::Dwolla::VerifiedBusinessCustomerController).to_not receive(:new)
+            expect(customer_controller).to_not receive(:valid?)
+            expect(subject.valid?).to eq(true)
+            expect(subject.errors).to be_empty
+          end
+        end
+
+        context 'invalid - only businessType is set' do
+          let(:attrs) { { businessType: businessType } }
+
+          it 'returns false' do
+            expect(MoneyMover::Dwolla::VerifiedBusinessCustomerController).to_not receive(:new)
+            expect(subject.valid?).to eq(false)
+            expect(subject.errors.full_messages).to eq([
+              "Firstname can't be blank",
+              "Lastname can't be blank",
+              "Email can't be blank",
+              "Address1 can't be blank",
+              "City can't be blank",
+              "State can't be blank",
+              "Postalcode can't be blank",
+              "Businessclassification can't be blank",
+              "Businessname can't be blank",
+              "Ssn can't be blank",
+              "Dateofbirth can't be blank"
+            ])
+          end
         end
       end
 
-      context 'valid - businessType soleproprietorhip (no controller required but it is set)' do
-        let(:attrs) { required_customer_attrs.merge(controller: controller_params) }
-        let(:businessType) { 'soleproprietorship' }
+      context 'businessType NOT soleproprietorship (i.e. llc, corporation, partnership)' do
+        let(:required_customer_attrs) { required_non_soleproprietor_customer_attrs }
+        let(:complete_customer_attrs) { complete_non_soleproprietor_customer_attrs }
 
-        it 'returns true' do
-          expect(MoneyMover::Dwolla::VerifiedBusinessCustomerController).to receive(:new)
-          expect(customer_controller).to_not receive(:valid?)
-          expect(subject.valid?).to eq(true)
-          expect(subject.errors).to be_empty
+
+        context 'valid - all required fields set' do
+          let(:attrs) { required_non_soleproprietor_customer_attrs.merge(controller: controller_params) }
+
+          it 'returns true' do
+            expect(customer_controller).to receive(:valid?)
+            expect(subject.valid?).to eq(true)
+            expect(subject.errors).to be_empty
+          end
         end
-      end
 
-      context 'valid - all required fields set' do
-        let(:attrs) { required_customer_attrs.merge(controller: controller_params) }
+        context 'valid - complete set of customer attrs and controller' do
+          let(:attrs) { complete_customer_attrs.merge(controller: controller_params) }
 
-        it 'returns true' do
-          expect(customer_controller).to receive(:valid?)
-          expect(subject.valid?).to eq(true)
-          expect(subject.errors).to be_empty
+          it 'returns true' do
+            expect(customer_controller).to receive(:valid?)
+            expect(subject.valid?).to eq(true)
+            expect(subject.errors).to be_empty
+          end
         end
-      end
 
-      context 'valid - all fields set' do
-        let(:attrs) { complete_customer_attrs.merge(controller: controller_params) }
+        context 'invalid - only businessType is set' do
+          let(:attrs) { { businessType: businessType } }
 
-        it 'returns true' do
-          expect(customer_controller).to receive(:valid?)
-          expect(subject.valid?).to eq(true)
-          expect(subject.errors).to be_empty
+          it 'returns false' do
+            expect(MoneyMover::Dwolla::VerifiedBusinessCustomerController).to_not receive(:new)
+            expect(subject.valid?).to eq(false)
+            expect(subject.errors.full_messages).to eq([
+              "Firstname can't be blank",
+              "Lastname can't be blank",
+              "Email can't be blank",
+              "Address1 can't be blank",
+              "City can't be blank",
+              "State can't be blank",
+              "Postalcode can't be blank",
+              "Businessclassification can't be blank",
+              "Businessname can't be blank",
+              "Ein can't be blank",
+              "Controller can't be blank"
+            ])
+          end
+        end
+
+        context 'invalid - controller is invalid' do
+          let(:attrs) { required_customer_attrs.merge(controller: controller_params) }
+          let(:controller_valid?) { false }
+
+          it 'returns false' do
+            expect(customer_controller).to receive(:valid?)
+            expect(subject.valid?).to eq(false)
+            expect(subject.errors.full_messages).to eq([
+              "Controller controller error message",
+              "Controller controller error message 2",
+            ])
+          end
         end
       end
 
@@ -283,96 +371,117 @@ describe 'VerifiedBusinessCustomer models' do
             "City can't be blank",
             "State can't be blank",
             "Postalcode can't be blank",
-            "Dateofbirth can't be blank",
-            "Ssn can't be blank",
-            "Phone can't be blank",
             "Businessclassification can't be blank",
             "Businesstype can't be blank",
             "Businessname can't be blank",
-            "Ein can't be blank"
-          ])
-        end
-      end
-
-      context 'invalid - controller is invalid' do
-        let(:attrs) { required_customer_attrs.merge(controller: controller_params) }
-        let(:controller_valid?) { false }
-
-        it 'returns false' do
-          expect(customer_controller).to receive(:valid?)
-          expect(subject.valid?).to eq(false)
-          expect(subject.errors.full_messages).to eq([
-            "Controller controller error message",
-            "Controller controller error message 2",
+            "Ssn can't be blank",
+            "Dateofbirth can't be blank"
           ])
         end
       end
     end
 
     describe '#to_params' do
-      context 'controller set' do
-        let(:attrs) { complete_customer_attrs.merge(controller: controller_params) }
+      context 'businessType is NOT soleproprietor' do
+        context 'all fields set' do
+          let(:attrs) { complete_non_soleproprietor_customer_attrs.merge(controller: controller_params) }
 
-        it 'returns expected values' do
-          expect(subject.to_params).to eq({
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            address1: address1,
-            address2: address2,
-            city: city,
-            state: state,
-            postalCode: postalCode,
-            dateOfBirth: dateOfBirth,
-            ssn: ssn,
-            phone: phone,
-            businessClassification: businessClassification,
-            businessType: businessType,
-            businessName: businessName,
-            ein: ein,
-            doingBusinessAs: doingBusinessAs,
-            website: "http://#{website}",  # note adds protocol scheme
-            ipAddress: ipAddress,
-            type: 'business',
-            controller: controller_to_params
-          })
+          it 'returns expected values' do
+            expect(subject.to_params).to eq({
+              firstName: firstName,
+              lastName: lastName,
+              email: email,
+              address1: address1,
+              address2: address2,
+              city: city,
+              state: state,
+              postalCode: postalCode,
+              phone: phone,
+              businessClassification: businessClassification,
+              businessType: businessType,
+              businessName: businessName,
+              ein: ein,
+              doingBusinessAs: doingBusinessAs,
+              ipAddress: ipAddress,
+              type: 'business',
+              controller: controller_to_params
+            })
+          end
+        end
+
+        context 'controller not set' do
+          let(:attrs) { required_non_soleproprietor_customer_attrs }
+
+          it 'returns expected values' do
+            expect(subject.to_params).to eq({
+              firstName: firstName,
+              lastName: lastName,
+              email: email,
+              address1: address1,
+              city: city,
+              state: state,
+              postalCode: postalCode,
+              businessClassification: businessClassification,
+              businessType: businessType,
+              businessName: businessName,
+              ein: ein,
+              doingBusinessAs: businessName,
+              type: 'business'
+            })
+          end
         end
       end
 
-      context 'controller not set' do
-        let(:attrs) { complete_customer_attrs }
+      context 'businessType is soleproprietor' do
+        let(:businessType) { 'soleproprietorship' }
 
-        it 'returns expected values' do
-          expect(subject.to_params).to eq({
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            address1: address1,
-            address2: address2,
-            city: city,
-            state: state,
-            postalCode: postalCode,
-            dateOfBirth: dateOfBirth,
-            ssn: ssn,
-            phone: phone,
-            businessClassification: businessClassification,
-            businessType: businessType,
-            businessName: businessName,
-            ein: ein,
-            doingBusinessAs: doingBusinessAs,
-            website: "http://#{website}",  # note adds protocol scheme
-            ipAddress: ipAddress,
-            type: 'business'
-          })
+        context 'complete data set' do
+          let(:attrs) { complete_soleproprietor_customer_attrs.merge(controller: controller_params) }
+
+          it 'returns expected values' do
+            expect(subject.to_params).to eq({
+              firstName: firstName,
+              lastName: lastName,
+              email: email,
+              address1: address1,
+              address2: address2,
+              city: city,
+              state: state,
+              postalCode: postalCode,
+              phone: phone,
+              businessClassification: businessClassification,
+              businessType: businessType,
+              businessName: businessName,
+              dateOfBirth: dateOfBirth,
+              ssn: ssn,
+              doingBusinessAs: doingBusinessAs,
+              ipAddress: ipAddress,
+              type: 'business',
+            })
+          end
         end
-      end
 
-      context 'website has a protocol scheme' do
-        let(:website) { "https://somedomain.org" }
-        let(:attrs) { complete_customer_attrs }
+        context 'required data set' do
+          let(:attrs) { required_soleproprietor_customer_attrs.merge(controller: controller_params) }
 
-        it 'returns original website value' do
-          expect(subject.to_params[:website]).to eq(website)
+          it 'returns expected values' do
+            expect(subject.to_params).to eq({
+              firstName: firstName,
+              lastName: lastName,
+              email: email,
+              address1: address1,
+              city: city,
+              state: state,
+              postalCode: postalCode,
+              businessClassification: businessClassification,
+              businessType: businessType,
+              businessName: businessName,
+              dateOfBirth: dateOfBirth,
+              ssn: ssn,
+              doingBusinessAs: businessName,
+              type: 'business',
+            })
+          end
         end
       end
     end
