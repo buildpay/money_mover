@@ -3,7 +3,7 @@ module MoneyMover
     class ApiConnection
       attr_reader :connection
 
-      def initialize(access_token, url_provider = EnvironmentUrls.new)
+      def initialize(access_token, url_provider)
         @connection ||= Faraday.new(url: url_provider.api_url) do |faraday|
           faraday.authorization :Bearer, access_token if access_token
           faraday.headers[:accept] = "application/vnd.dwolla.v1.hal+json"

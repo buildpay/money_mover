@@ -4,6 +4,7 @@ require 'rack/utils'
 require 'faraday'
 require 'faraday_middleware'
 require 'active_model'
+require 'hashie'
 
 require 'money_mover/version'
 require 'money_mover/standalone_errors'

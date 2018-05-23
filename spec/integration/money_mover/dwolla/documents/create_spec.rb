@@ -1,24 +1,18 @@
 require 'spec_helper'
 
-describe MoneyMover::Dwolla::Document do
+describe 'create a customer document' do
   let(:customer_id) { 'customer-id' }
   let(:file) { File.expand_path('../../../../../support/fixtures/sample.jpg', __FILE__) }
   let(:file_fixture) { Rack::Test::UploadedFile.new(file, 'image/jpeg') }
   let(:documentType) { 'other' }
 
   let(:attrs) {{
-    customer_id: customer_id,
     documentType: 'other',
     file: file_fixture
   }}
 
-  subject { described_class.new(attrs) }
-
-  let(:create_params) {{
-    documentType: documentType,
-    #file: File.new(file, 'rb')
-    #file: Faraday::UploadIO.new(file)
-  }}
+  let(:document_model) { MoneyMover::Dwolla::Document.new(attrs) }
+  subject { MoneyMover::Dwolla::CustomerDocumentResource.new }
 
   let(:resource_token) { 'some-token' }
 
@@ -26,12 +20,12 @@ describe MoneyMover::Dwolla::Document do
     dwolla_helper.stub_request(:post, dwolla_helper.build_dwolla_url(dwolla_helper.customer_documents_endpoint(customer_id))).with(headers: dwolla_helper.request_headers).to_return(create_response)
   end
 
-  describe '#save' do
+  describe '#create' do
     context 'success' do
       let(:create_response) { dwolla_helper.customer_document_created_response resource_token }
 
       it 'creates new resource in dwolla' do
-        expect(subject.save).to eq(true)
+        expect(subject.create(document_model, customer_id)).to eq(true)
         expect(subject.id).to eq(resource_token)
         expect(subject.resource_location).to eq(dwolla_helper.document_endpoint(resource_token))
       end
@@ -52,7 +46,7 @@ describe MoneyMover::Dwolla::Document do
       }}
 
       it 'returns errors' do
-        expect(subject.save).to eq(false)
+        expect(subject.create(document_model, customer_id)).to eq(false)
         expect(subject.errors[:file]).to eq(['Invalid parameter.'])
         expect(subject.id).to be_nil
         expect(subject.resource_location).to be_nil

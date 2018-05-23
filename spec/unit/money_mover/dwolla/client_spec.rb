@@ -5,7 +5,7 @@ describe MoneyMover::Dwolla::ApplicationClient do
   let(:server_request) { double 'server request' }
 
   let(:url_provider) { double 'url provider', api_url: api_url }
-  let(:api_url) { double' api url' }
+  let(:api_url) { double 'api url' }
 
   subject { described_class.new }
 
@@ -16,7 +16,8 @@ describe MoneyMover::Dwolla::ApplicationClient do
   let(:faraday_connection) { double 'faraday connection' }
 
   before do
-    allow(MoneyMover::Dwolla::ApiConnection).to receive(:new).with(token) { api_connection }
+    allow(MoneyMover::Dwolla::EnvironmentUrls).to receive(:new) { url_provider }
+    allow(MoneyMover::Dwolla::ApiConnection).to receive(:new).with(token, url_provider) { api_connection }
     allow(MoneyMover::Dwolla::ApplicationToken).to receive(:new) { dwolla_token_provider }
   end
 
@@ -33,6 +34,7 @@ describe MoneyMover::Dwolla::ApplicationClient do
     end
 
     it 'returns success response' do
+      expect(faraday_connection).to receive(:post).with(url, params)
       expect(subject.post(url, params)).to eq(expected_response)
     end
   end

@@ -1,20 +1,21 @@
 require 'spec_helper'
 
-describe MoneyMover::Dwolla::MicroDepositVerification do
-  let(:funding_source_token) { '9481924a-6795-4e7a-b436-a7a48a4141ca' }
+describe 'verify funding source micro-deposits' do
 
-  describe '#save' do
+  describe '#update' do
+    let(:funding_source_token) { '9481924a-6795-4e7a-b436-a7a48a4141ca' }
+
+    let(:verification_model) { MoneyMover::Dwolla::MicroDepositVerification.new(attrs) }
+    subject { MoneyMover::Dwolla::MicroDepositResource.new }
+
     context 'valid attributes' do
       let(:amount1) { 0.01 }
       let(:amount2) { 0.02 }
 
       let(:attrs) {{
-        funding_source_id: funding_source_token,
         amount1: amount1,
         amount2: amount2
       }}
-
-      subject { described_class.new(attrs) }
 
       let(:create_params) {{
         amount1: {
@@ -37,8 +38,8 @@ describe MoneyMover::Dwolla::MicroDepositVerification do
           body: ""
         }}
 
-        it 'creates new resource in dwolla' do
-          expect(subject.save).to eq(true)
+        it 'verifies microdeposits in dwolla' do
+          expect(subject.update(verification_model, funding_source_token)).to eq(true)
         end
       end
 
@@ -57,7 +58,7 @@ describe MoneyMover::Dwolla::MicroDepositVerification do
         }}
 
         it 'returns errors' do
-          expect(subject.save).to eq(false)
+          expect(subject.update(verification_model, funding_source_token)).to eq(false)
           expect(subject.errors[:amount1]).to eq(['Invalid amount.'])
           expect(subject.errors[:amount2]).to eq(['Invalid amount.'])
         end
@@ -68,7 +69,7 @@ describe MoneyMover::Dwolla::MicroDepositVerification do
       let(:attrs) {{}}
 
       it 'returns errors' do
-        expect(subject.save).to eq(false)
+        expect(subject.update(verification_model, funding_source_token)).to eq(false)
         expect(subject.errors[:amount1]).to eq(["can't be blank", "is not a number"])
         expect(subject.errors[:amount2]).to eq(["can't be blank", "is not a number"])
       end
