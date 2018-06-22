@@ -16,7 +16,7 @@ module MoneyMover
 
       def initialize(ach_config = Config.new)
         @ach_config = ach_config
-        @environment = @ach_config.environment
+        @environment = @ach_config.environment.to_sym
       end
 
       def api_url
