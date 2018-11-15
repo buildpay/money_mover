@@ -8,7 +8,7 @@ module MoneyMover
           faraday.authorization :Bearer, access_token if access_token
           faraday.headers[:accept] = "application/vnd.dwolla.v1.hal+json"
           faraday.headers[:content_type] = "application/x-www-form-urlencoded"
-          faraday.response :json, content_type: "application/json"
+          faraday.response :json, content_type: /\bjson$/
           faraday.adapter Faraday.default_adapter
         end
 
