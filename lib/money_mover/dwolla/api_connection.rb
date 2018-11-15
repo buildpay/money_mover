@@ -11,7 +11,7 @@ module MoneyMover
           faraday.request :url_encoded
           faraday.request :json
           faraday.response :json, content_type: /\bjson$/
-          faraday.response :url_enconded, content_type: /\burl_encoded$/
+          faraday.response :url_encoded, content_type: /\burl_encoded$/
           faraday.adapter Faraday.default_adapter
         end
       end
