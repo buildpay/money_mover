@@ -12,6 +12,12 @@ module MoneyMover
           faraday.response :json, content_type: /\bjson$/
           faraday.adapter Faraday.default_adapter
         end
+
+        puts "\n\n\n\n"
+        puts "#{@connection.to_json}"
+        puts "\n\n\n\n"
+
+        @connection
       end
     end
   end
