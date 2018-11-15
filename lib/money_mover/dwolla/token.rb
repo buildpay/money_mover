@@ -18,7 +18,7 @@ module MoneyMover
       end
 
       def request_new_token!
-        response = @client.post @client.token_url, create_params
+        response = @client.post @client.token_url, create_params.to_query
         Token.new response.body
       end
     end
