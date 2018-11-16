@@ -39,8 +39,9 @@ module MoneyMover
 
       def list(params = {}, *ids)
         path = get_path(:list, ids)
-
+        puts "params before sanitizing:#{params}" 
         params = sanitize_list_params(params)
+        puts "params after sanitizing:#{params}" 
         response = @client.get path, params
         if response.success?
           ApiResponseMash.new(response.body)
