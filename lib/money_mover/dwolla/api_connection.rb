@@ -12,6 +12,7 @@ module MoneyMover
             faraday.request :json
             faraday.response :json, content_type: /\bjson$/
             faraday.adapter Faraday.default_adapter
+          end
         elsif content_type == 'url_encoded'
           @connection ||= Faraday.new(url: url_provider.api_url) do |faraday|
             faraday.authorization :Bearer, access_token if access_token
@@ -19,6 +20,7 @@ module MoneyMover
             faraday.headers[:content_type] = "application/x-www-form-urlencoded"
             faraday.response :json, content_type: /\bjson$/
             faraday.adapter Faraday.default_adapter
+          end
         else
           raise "Request header should have a content type of json or encoded url"
         end
