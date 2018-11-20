@@ -2,6 +2,7 @@ module MoneyMover
   module Dwolla
     class Client
       delegate :api_url, :token_url, :auth_url, to: :@url_provider
+      attr_reader :content_type
 
       def initialize(access_token = nil, url_provider = EnvironmentUrls.new, params = {})
         @url_provider = url_provider
