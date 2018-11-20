@@ -23,7 +23,11 @@ module MoneyMover
       end
 
       def self.make_http_client
-        @client = Client.new(content_type = 'url_encoded')
+        @client = Client.new(content_type)
+      end
+
+      def content_type
+        'url_encoded'
       end
     end
   end
