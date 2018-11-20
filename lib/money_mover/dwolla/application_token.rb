@@ -1,10 +1,6 @@
 module MoneyMover
   module Dwolla
     class ApplicationToken < Token
-      def initialize(content_type = 'url_encoded')
-        super
-      end
-
       def access_token
         @ach_config.account_token_provider.access_token
       end
