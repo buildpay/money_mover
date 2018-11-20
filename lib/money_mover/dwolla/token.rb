@@ -23,7 +23,7 @@ module MoneyMover
       end
 
       def self.make_http_client
-        @client = Client.new(content_type)
+        @client = Client.new(content_type: content_type)
       end
 
       def content_type
