@@ -222,7 +222,7 @@ class DwollaHelper
   # taken from ach_helper
 
   def get_token_url
-    "https://sandbox.dwolla.com/oauth/v2/token"
+    "https://accounts-sandbox.dwolla.com/token"
   end
 
   def error_response(body_json = {})
@@ -241,9 +241,10 @@ class DwollaHelper
     }
 
     req_headers = {
-      'Accept'=>'application/vnd.dwolla.v1.hal+json',
-      'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-      'User-Agent'=>"Faraday v#{Faraday::VERSION}"
+      'Accept' => 'application/json',
+      'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+      'Content-Type' => 'application/x-www-form-urlencoded',
+      'User-Agent' => "Faraday v#{Faraday::VERSION}"
     }
 
     stub_request(:post, get_token_url).with(body: req_body, headers: req_headers).

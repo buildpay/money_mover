@@ -15,49 +15,103 @@ describe MoneyMover::Dwolla::ApplicationClient do
   let(:api_connection) { double 'api connection', connection: faraday_connection }
   let(:faraday_connection) { double 'faraday connection' }
 
-  before do
-    allow(MoneyMover::Dwolla::EnvironmentUrls).to receive(:new) { url_provider }
-    allow(MoneyMover::Dwolla::ApiConnection).to receive(:new).with(token, url_provider) { api_connection }
-    allow(MoneyMover::Dwolla::ApplicationToken).to receive(:new) { dwolla_token_provider }
-  end
-
-  let(:url) { double 'url' }
-  let(:params) { double 'params' }
-
-  describe '#post' do
-    let(:expected_response) { double 'expected response' }
-    let(:server_request) { double 'server request', response: expected_response }
+  describe 'content type is json' do
+    let(:content_type) { 'json' }
 
     before do
-      allow(faraday_connection).to receive(:post).with(url, params) { server_request }
-      allow(MoneyMover::Dwolla::ApiServerResponse).to receive(:new).with(server_request) { expected_response }
+      allow(MoneyMover::Dwolla::EnvironmentUrls).to receive(:new) { url_provider }
+      allow(MoneyMover::Dwolla::ApiConnection).to receive(:new).with(token, url_provider, content_type) { api_connection }
+      allow(MoneyMover::Dwolla::ApplicationToken).to receive(:new) { dwolla_token_provider }
     end
 
-    it 'returns success response' do
-      expect(faraday_connection).to receive(:post).with(url, params)
-      expect(subject.post(url, params)).to eq(expected_response)
+    let(:url) { double 'url' }
+    let(:params) { double 'params' }
+
+    describe '#post' do
+      let(:expected_response) { double 'expected response' }
+      let(:server_request) { double 'server request', response: expected_response }
+
+      before do
+        allow(faraday_connection).to receive(:post).with(url, params) { server_request }
+        allow(MoneyMover::Dwolla::ApiServerResponse).to receive(:new).with(server_request) { expected_response }
+      end
+
+      it 'returns success response' do
+        expect(faraday_connection).to receive(:post).with(url, params)
+        expect(subject.post(url, params)).to eq(expected_response)
+      end
+    end
+
+    describe '#delete' do
+      before do
+        allow(faraday_connection).to receive(:delete).with(url, params) { server_request }
+        allow(MoneyMover::Dwolla::ApiServerResponse).to receive(:new).with(server_request) { expected_response }
+      end
+
+      it 'returns SuccessResponse' do
+        expect(subject.delete(url, params)).to eq(expected_response)
+      end
+    end
+
+    describe '#get' do
+      before do
+        allow(faraday_connection).to receive(:get).with(url, params) { server_request }
+        allow(MoneyMover::Dwolla::ApiServerResponse).to receive(:new).with(server_request) { expected_response }
+      end
+
+      it 'returns response from token#get' do
+        expect(subject.get(url, params)).to eq(expected_response)
+      end
     end
   end
 
-  describe '#delete' do
+  describe 'content type is url_encoded' do
+    let(:content_type) { 'url_encoded' }
+
     before do
-      allow(faraday_connection).to receive(:delete).with(url, params) { server_request }
-      allow(MoneyMover::Dwolla::ApiServerResponse).to receive(:new).with(server_request) { expected_response }
+      allow(MoneyMover::Dwolla::EnvironmentUrls).to receive(:new) { url_provider }
+      allow(MoneyMover::Dwolla::ApiConnection).to receive(:new).with(token, url_provider, content_type) { api_connection }
+      allow(MoneyMover::Dwolla::ApplicationToken).to receive(:new) { dwolla_token_provider }
     end
 
-    it 'returns SuccessResponse' do
-      expect(subject.delete(url, params)).to eq(expected_response)
-    end
-  end
+    let(:url) { double 'url' }
+    let(:params) { double 'params' }
 
-  describe '#get' do
-    before do
-      allow(faraday_connection).to receive(:get).with(url, params) { server_request }
-      allow(MoneyMover::Dwolla::ApiServerResponse).to receive(:new).with(server_request) { expected_response }
+    describe '#post' do
+      let(:expected_response) { double 'expected response' }
+      let(:server_request) { double 'server request', response: expected_response }
+
+      before do
+        allow(faraday_connection).to receive(:post).with(url, params) { server_request }
+        allow(MoneyMover::Dwolla::ApiServerResponse).to receive(:new).with(server_request) { expected_response }
+      end
+
+      it 'returns success response' do
+        expect(faraday_connection).to receive(:post).with(url, params)
+        expect(subject.post(url, params)).to eq(expected_response)
+      end
     end
 
-    it 'returns response from token#get' do
-      expect(subject.get(url, params)).to eq(expected_response)
+    describe '#delete' do
+      before do
+        allow(faraday_connection).to receive(:delete).with(url, params) { server_request }
+        allow(MoneyMover::Dwolla::ApiServerResponse).to receive(:new).with(server_request) { expected_response }
+      end
+
+      it 'returns SuccessResponse' do
+        expect(subject.delete(url, params)).to eq(expected_response)
+      end
+    end
+
+    describe '#get' do
+      before do
+        allow(faraday_connection).to receive(:get).with(url, params) { server_request }
+        allow(MoneyMover::Dwolla::ApiServerResponse).to receive(:new).with(server_request) { expected_response }
+      end
+
+      it 'returns response from token#get' do
+        expect(subject.get(url, params)).to eq(expected_response)
+      end
     end
   end
 end
