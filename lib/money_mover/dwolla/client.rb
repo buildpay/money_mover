@@ -3,12 +3,8 @@ module MoneyMover
     class Client
       delegate :api_url, :token_url, :auth_url, to: :@url_provider
 
-      def initialize(params = {}, access_token = nil, url_provider = EnvironmentUrls.new)
+      def initialize(content_type = 'json', access_token = nil, url_provider = EnvironmentUrls.new)
         @url_provider = url_provider
-        if params.empty?
-          puts "Hash is empty"
-        end
-        @content_type = params.fetch(:content_type, 'json')
         @connection = ApiConnection.new(access_token, url_provider, @content_type).connection
       end
 
