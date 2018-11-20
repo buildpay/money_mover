@@ -6,7 +6,7 @@ module MoneyMover
 
       def initialize(access_token = nil, url_provider = EnvironmentUrls.new, params = {})
         @url_provider = url_provider
-        @content_type = params.fetch :content_type, 'json'
+        @content_type = params.fetch(:content_type, 'json')
         @connection = ApiConnection.new(access_token, url_provider, @content_type).connection
       end
 
