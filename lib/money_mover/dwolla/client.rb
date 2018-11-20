@@ -5,7 +5,7 @@ module MoneyMover
 
       def initialize(content_type = 'json', access_token = nil, url_provider = EnvironmentUrls.new)
         @url_provider = url_provider
-        @connection = ApiConnection.new(access_token, url_provider, @content_type).connection
+        @connection = ApiConnection.new(access_token, url_provider, content_type).connection
       end
 
       def post(url, params)
