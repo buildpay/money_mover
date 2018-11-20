@@ -2,8 +2,8 @@ module MoneyMover
   module Dwolla
     class RootAccount
 
-      def initialize
-        @account_info = ApplicationClient.new.get('/').body
+      def initialize(content_type = 'json')
+        @account_info = ApplicationClient.new(content_type).get('/').body
       end
 
       def account_resource_location
