@@ -15,10 +15,10 @@ module MoneyMover
 
         @ach_config = ach_config
         @client = client
+        puts "The content type is #{@client.content_type}"
       end
 
       def request_new_token!
-        puts "The type is #{@client.content_type}"
         response = @client.post @client.token_url, create_params.to_query
         Token.new response.body
       end
