@@ -3,7 +3,7 @@ module MoneyMover
     class Client
       delegate :api_url, :token_url, :auth_url, to: :@url_provider
 
-      def initialize(access_token = nil, url_provider = EnvironmentUrls.new, params = {})
+      def initialize(params = {}, access_token = nil, url_provider = EnvironmentUrls.new)
         @url_provider = url_provider
         if params.empty?
           puts "Hash is empty"
