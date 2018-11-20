@@ -17,13 +17,8 @@ module MoneyMover
       end
 
       def request_new_token!
-        self.make_http_client
-        response = @client.post @client.token_url, create_params.to_query
+        response = Client.new(content_type = 'url_encoded').post @client.token_url, create_params.to_query
         Token.new response.body
-      end
-
-      def self.make_http_client
-        @client = Client.new(content_type = 'url_encoded')
       end
     end
   end
