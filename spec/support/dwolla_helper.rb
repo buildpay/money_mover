@@ -233,6 +233,18 @@ class DwollaHelper
     }
   end
 
+  def request_token_request_body
+    req_body = {
+      grant_type: "client_credentials",
+      client_id: api_key,
+      client_secret: api_secret_key,
+    }.to_query
+  end
+
+  def response_body(params)
+    params.to_json
+  end
+
   def stub_refresh_token_request(token_response)
     req_body = {
       grant_type: "client_credentials",
