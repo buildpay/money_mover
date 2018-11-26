@@ -21,7 +21,6 @@ end
 
 # INTEGRATION TEST
 describe MoneyMover::Dwolla::ApplicationToken do
-  let(:token) {subject.new}
   let(:refresh_token_request_params) { dwolla_helper.request_token_request_body }
 
   let(:account_id) { "7da912eb-5976-4e5c-b5ab-a5df35ac661b" }
@@ -42,6 +41,9 @@ describe MoneyMover::Dwolla::ApplicationToken do
   }}
 
   describe '#request_new_token!' do
+    let(:subject) { double 'subject', request_new_token!: request_new_token!}
+    let(:request_new_token!) { MoneyMover::Dwolla::Token.new(client_response.body) }
+
     let(:content_type) { 'url_encoded' }
     let(:url_provider) { double 'url provider'}
 
@@ -58,18 +60,18 @@ describe MoneyMover::Dwolla::ApplicationToken do
     let(:token_response) { refresh_token_success_response }
     let(:client_response) { double 'client response', body: token_response.to_json }
 
-    let(:new_token_instance ) { double 'new token instance' }
+    let(:new_token) { double 'new token', account_id: 5}
 
     let(:token) { nil }
+    puts "#{client_response.body}"
+
 
     before do
-      # allow_any_instance_of(MoneyMover::Dwolla::Token).to receive(:request_new_token!) { new_token }
-
       allow(MoneyMover::Dwolla::Client).to receive(:new).with(content_type: content_type) { client }
       allow(MoneyMover::Dwolla::EnvironmentUrls).to receive(:new) { url_provider }
       allow(MoneyMover::Dwolla::ApiConnection).to receive(:new).with(token, url_provider, content_type) { api_connection }
       allow(MoneyMover::Dwolla::ApiServerResponse).to receive(:new).with(server_request) { token_response }
-      allow(MoneyMover::Dwolla::Token).to receive(:new).with(client_response.body) { new_token_instance }
+      allow(MoneyMover::Dwolla::Token).to receive(:new).with(client_response.body) { new_token }
     end
 
     context 'success' do
