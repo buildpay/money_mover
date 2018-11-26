@@ -47,22 +47,19 @@ describe MoneyMover::Dwolla::ApplicationToken do
     let(:content_type) { 'url_encoded' }
     let(:url_provider) { double 'url provider'}
 
-    let(:token) { nil }
-
     let(:client) { double 'client', post: server_response }
-
     let(:api_connection) { double 'api connection', connection: faraday_connection }
     let(:faraday_connection) { double 'faraday connection', post: server_request.response }
-
     let(:server_request) { double 'server request', response: server_response }
+
     let(:server_response) { refresh_token_success_response }
     let(:server_response_body) { server_response.to_json }
-    let(:new_token_parsed) { JSON.parse(server_response_body) }
+    let(:server_response_parsed) { JSON.parse(server_response_body) }
 
     let(:new_token) { double 'new token', account_id: new_token_account_id, expires_in: new_token_expires_in, access_token: new_token_access_token}
-    let(:new_token_account_id) { new_token_parsed["account_id"] }
-    let(:new_token_expires_in) { new_token_parsed["expires_in"] }
-    let(:new_token_access_token) { new_token_parsed["access_token"] }
+    let(:new_token_account_id) { server_response_parsed["account_id"] }
+    let(:new_token_expires_in) { server_response_parsed["expires_in"] }
+    let(:new_token_access_token) { server_response_parsed["access_token"] }
 
     before do
       allow(MoneyMover::Dwolla::Client).to receive(:new).with(content_type: content_type) { client }
