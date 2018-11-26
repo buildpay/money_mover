@@ -47,33 +47,28 @@ describe MoneyMover::Dwolla::ApplicationToken do
     let(:content_type) { 'url_encoded' }
     let(:url_provider) { double 'url provider'}
 
-    let(:client) { double 'client', token_url: token_url, post: client_post}
-    let(:client_post) { client_response }
+    let(:token) { nil }
 
-    let(:token_url) { dwolla_helper.get_token_url }
+    let(:client) { double 'client', post: server_response }
 
     let(:api_connection) { double 'api connection', connection: faraday_connection }
-    let(:faraday_connection) { double 'faraday connection', post: faraday_post.response }
-    let(:faraday_post) { server_request }
+    let(:faraday_connection) { double 'faraday connection', post: server_request.response }
 
     let(:server_request) { double 'server request', response: server_response }
     let(:server_response) { refresh_token_success_response }
     let(:server_response_body) { server_response.to_json }
-    let(:new_token_info) { JSON.parse(server_response_body) }
+    let(:new_token_parsed) { JSON.parse(server_response_body) }
 
     let(:new_token) { double 'new token', account_id: new_token_account_id, expires_in: new_token_expires_in, access_token: new_token_access_token}
-    let(:new_token_account_id) { new_token_info["account_id"] }
-    let(:new_token_expires_in) { new_token_info["expires_in"] }
-    let(:new_token_access_token) { new_token_info["access_token"] }
-    let(:dumb) {double 'dumb'}
-    let(:token) { nil }
-
+    let(:new_token_account_id) { new_token_parsed["account_id"] }
+    let(:new_token_expires_in) { new_token_parsed["expires_in"] }
+    let(:new_token_access_token) { new_token_parsed["access_token"] }
 
     before do
       allow(MoneyMover::Dwolla::Client).to receive(:new).with(content_type: content_type) { client }
       allow(MoneyMover::Dwolla::EnvironmentUrls).to receive(:new) { url_provider }
-      allow(MoneyMover::Dwolla::ApiConnection).to receive(:new).with(token, url_provider, content_type) { api_connection }
-      allow(MoneyMover::Dwolla::ApiServerResponse).to receive(:new).with(server_request) { server_request.response }
+      allow(MoneyMover::Dwolla::ApiConnection).to receive(:new).with(nil, url_provider, content_type) { api_connection }
+      allow(MoneyMover::Dwolla::ApiServerResponse).to receive(:new).with(server_request) { server_response }
       allow(MoneyMover::Dwolla::Token).to receive(:new).with(server_response_body) { new_token }
     end
 
