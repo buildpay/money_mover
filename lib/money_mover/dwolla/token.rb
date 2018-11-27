@@ -14,6 +14,7 @@ module MoneyMover
         @scope = attrs[:scope]
 
         @ach_config = ach_config
+        puts "Token info: #{attrs}\n\n\n\n"
       end
 
       def request_new_token!
