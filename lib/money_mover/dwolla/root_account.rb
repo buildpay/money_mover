@@ -4,6 +4,7 @@ module MoneyMover
 
       def initialize
         @account_info = ApplicationClient.new.get('/').body
+        puts "#{@account_info}"
       end
 
       def account_resource_location
@@ -16,6 +17,7 @@ module MoneyMover
 
       def funding_sources
         @funding_sources ||= AccountFundingSourceResource.new.list({}, account_resource_id).embedded_items
+        puts "#{@funding_sources}"
       end
 
       def bank_account_funding_source
