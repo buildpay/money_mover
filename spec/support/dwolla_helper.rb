@@ -241,28 +241,6 @@ class DwollaHelper
     }.to_query
   end
 
-  def response_body(params)
-    params.to_json
-  end
-
-  def stub_refresh_token_request(token_response)
-    req_body = {
-      grant_type: "client_credentials",
-      client_id: api_key,
-      client_secret: api_secret_key,
-    }
-
-    req_headers = {
-      'Accept' => 'application/json',
-      'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-      'Content-Type' => 'application/x-www-form-urlencoded',
-      'User-Agent' => "Faraday v#{Faraday::VERSION}"
-    }
-
-    stub_request(:post, get_token_url).with(body: req_body, headers: req_headers).
-      to_return(:status => 200, :body => token_response.to_json, headers: {"Content-Type" => "application/json"})
-  end
-
   def webhook_subscriptions_url
     "#{api_url}/webhook-subscriptions"
   end
