@@ -18,6 +18,7 @@ module MoneyMover
       def funding_sources
         @funding_sources ||= AccountFundingSourceResource.new.list({}, account_resource_id).embedded_items
         puts "#{@funding_sources}\n\n\n"
+        @funding_sources
       end
 
       def bank_account_funding_source
