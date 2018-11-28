@@ -21,7 +21,7 @@ module MoneyMover
       end
 
       def bank_account_funding_source
-        funding_sources.find{|source| source.type == 'bank' }
+        funding_sources.find{|source| source.name == 'Superhero Savings Bank' }
       end
     end
   end
