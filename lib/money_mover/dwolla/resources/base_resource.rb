@@ -53,6 +53,7 @@ module MoneyMover
         path = get_path(:find, ids)
 
         response = @client.get path
+        puts "Did it pass here?"
 
         if response.success?
           ApiResponseMash.new(response.body)
