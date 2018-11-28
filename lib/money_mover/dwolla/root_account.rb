@@ -21,6 +21,9 @@ module MoneyMover
       end
 
       def bank_account_funding_source
+        if funding_sources.empty?
+          raise "funding sources are empty"
+        end
         funding_sources.find{|source| source.name == 'Superhero Savings Bank' }
       end
     end
