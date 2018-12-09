@@ -3,7 +3,7 @@ module MoneyMover
     class Token
       attr_reader :account_id, :expires_in, :access_token, :refresh_token, :_links, :token_type, :refresh_expires_in, :scope
 
-      def initialize(attrs={}, ach_config = Config.new, client = Client.new)
+      def initialize(attrs={}, ach_config = Config.new)
         @_links = attrs[:_links]
         @account_id = attrs[:account_id]
         @expires_in = attrs[:expires_in]
@@ -14,11 +14,11 @@ module MoneyMover
         @scope = attrs[:scope]
 
         @ach_config = ach_config
-        @client = client
       end
 
       def request_new_token!
-        response = @client.post @client.token_url, create_params
+        @client = Client.new(content_type: 'url_encoded')
+        response = @client.post @client.token_url, create_params.to_query
         Token.new response.body
       end
     end

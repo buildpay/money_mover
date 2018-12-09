@@ -3,9 +3,9 @@ module MoneyMover
     class Client
       delegate :api_url, :token_url, :auth_url, to: :@url_provider
 
-      def initialize(access_token = nil, url_provider = EnvironmentUrls.new)
+      def initialize(access_token = nil, url_provider = EnvironmentUrls.new, content_type: 'json')
         @url_provider = url_provider
-        @connection = ApiConnection.new(access_token, url_provider).connection
+        @connection = ApiConnection.new(access_token, url_provider, content_type).connection
       end
 
       def post(url, params)

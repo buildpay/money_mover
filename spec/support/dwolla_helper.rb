@@ -222,7 +222,7 @@ class DwollaHelper
   # taken from ach_helper
 
   def get_token_url
-    "https://sandbox.dwolla.com/oauth/v2/token"
+    "https://accounts-sandbox.dwolla.com/token"
   end
 
   def error_response(body_json = {})
@@ -233,21 +233,12 @@ class DwollaHelper
     }
   end
 
-  def stub_refresh_token_request(token_response)
+  def request_token_request_body
     req_body = {
       grant_type: "client_credentials",
       client_id: api_key,
       client_secret: api_secret_key,
-    }
-
-    req_headers = {
-      'Accept'=>'application/vnd.dwolla.v1.hal+json',
-      'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-      'User-Agent'=>"Faraday v#{Faraday::VERSION}"
-    }
-
-    stub_request(:post, get_token_url).with(body: req_body, headers: req_headers).
-      to_return(:status => 200, :body => token_response.to_json, headers: {"Content-Type" => "application/json"})
+    }.to_query
   end
 
   def webhook_subscriptions_url

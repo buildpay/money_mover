@@ -6,6 +6,7 @@ describe MoneyMover::Dwolla::ApplicationClient do
 
   let(:url_provider) { double 'url provider', api_url: api_url }
   let(:api_url) { double 'api url' }
+  let(:content_type) { 'json' }
 
   subject { described_class.new }
 
@@ -17,7 +18,7 @@ describe MoneyMover::Dwolla::ApplicationClient do
 
   before do
     allow(MoneyMover::Dwolla::EnvironmentUrls).to receive(:new) { url_provider }
-    allow(MoneyMover::Dwolla::ApiConnection).to receive(:new).with(token, url_provider) { api_connection }
+    allow(MoneyMover::Dwolla::ApiConnection).to receive(:new).with(token, url_provider, content_type) { api_connection }
     allow(MoneyMover::Dwolla::ApplicationToken).to receive(:new) { dwolla_token_provider }
   end
 
