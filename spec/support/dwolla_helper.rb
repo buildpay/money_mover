@@ -64,7 +64,7 @@ class DwollaHelper
   end
 
   def api_url
-    "https://api-sandbox.dwolla.com"
+    "http://localhost:55034"
   end
 
   def api_endpoint
@@ -222,7 +222,7 @@ class DwollaHelper
   # taken from ach_helper
 
   def get_token_url
-    "https://sandbox.dwolla.com/oauth/v2/token"
+    "http://localhost:55034/oauth/v2/token"
   end
 
   def error_response(body_json = {})
